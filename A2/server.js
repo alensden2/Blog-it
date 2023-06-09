@@ -1,51 +1,133 @@
 const express = require('express');
 const grpc = require("@grpc/grpc-js");
-const protoLoader = require("@grpc/proto-loader");
 const AWS = require('aws-sdk');
-const path = require('path')
+const protoLoader = require('@grpc/proto-loader');
+const bodyParser = require('body-parser');
 
-/** used - npx grpc_tools_node_protoc --js_out=import_style=commonjs,binary:./ --grpc_out=./ --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin` computeandstorage.proto
- * to generate the grpc files
- */
+const s3 = new AWS.S3();
 
-/** Loading the package to use the proto file */
-const packageDefinination = protoLoader.loadSync("computeandstorage.proto", {})
-const grpcObject = grpc.loadPackageDefinition(packageDefinination);
-const computeandstorage = grpcObject.computeandstorage;
+const app = express();
+app.use(bodyParser.json());
 
-/** creating the new gRPC server */
-const server = new grpc.Server();
+const packageDefinition = protoLoader.loadSync('computeandstorage.proto', {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const computeAndStorageProto = grpc.loadPackageDefinition(packageDefinition).computeandstorage;
 
-/** assigning the proto functions to the created functions here */
-server.addService(computeandstorage.EC2Operations.service, {
-    "StoreData": StoreData,
-    "AppendData": AppendData,
-    "DeleteFile": DeleteFile
-})
+function storeData(call, callback) {
+  const data = call.request.data;
+  const fileName = "alen-a2.txt";
 
-/** starting the server in a insecure mode */
-server.bindAsync("0.0.0.0:40000", grpc.ServerCredentials.createInsecure(), (error, port) => {
-    if (error) {
-        console.error("Error for server : ", error);
-        return;
+  const params = {
+    Body: data,
+    Bucket: 'alen-a2-bucket',
+    Key: fileName,
+    ACL: 'public-read',
+  };
+
+  s3.upload(params, (err, data) => {
+    if (err) {
+      console.error(err);
+      callback(err);
+    } else {
+      const s3uri = data.Location;
+      callback(null, { s3uri });
     }
-    server.start();
+  });
+}
 
-    console.log("server listening on port 40000")
+function appendData(call, callback) {
+  const data = call.request.data;
+  const s3uri = call.metadata.get('s3uri');
+
+  const params = {
+    Bucket: '<YOUR_BUCKET_NAME>',
+    Key: s3uri,
+  };
+
+  s3.getObject(params, (err, result) => {
+    if (err) {
+      console.error(err);
+      callback(err);
+    } else {
+      const existingData = result.Body.toString();
+      const updatedData = existingData + data;
+
+      const updateParams = {
+        Body: updatedData,
+        Bucket: '<YOUR_BUCKET_NAME>',
+        Key: s3uri,
+      };
+
+      s3.upload(updateParams, (err, data) => {
+        if (err) {
+          console.error(err);
+          callback(err);
+        } else {
+          callback(null, {});
+        }
+      });
+    }
+  });
+}
+
+function deleteFile(call, callback) {
+  const s3uri = call.request.s3uri;
+
+  const params = {
+    Bucket: '<YOUR_BUCKET_NAME>',
+    Key: s3uri,
+  };
+
+  s3.deleteObject(params, (err, data) => {
+    if (err) {
+      console.error(err);
+      callback(err);
+    } else {
+      callback(null, {});
+    }
+  });
+}
+
+app.post('/start', (req, res) => {
+  const { banner, ip } = req.body;
+  console.log('Received /start request');
+  console.log('Banner:', banner);
+  console.log('IP:', ip);
+
+  // Make a request to your app's StoreData method here
+  // ...
+  // Retrieve the file URL and send it back in the response
+  const fileUrl = '<PUBLIC_URL_OF_S3_FILE>'; // Replace with the actual URL
+  res.json({ fileUrl });
 });
 
-
-/** Store */
-function StoreData(call, callback) {
-    console.log(call.request.data);
-    callback(null, {"s3uri" : call.request.data});
-}
-
-function AppendData(call, callback) {
-    callback(null, null)
-}
-
-function DeleteFile(call, callback) {
-    callback(null, null)
-}
-
+function main() {
+    const server = new grpc.Server();
+    server.addService(computeAndStorageProto.EC2Operations.service, {
+      StoreData: storeData,
+      AppendData: appendData,
+      DeleteFile: deleteFile,
+    });
+  
+    const port = 50051;
+    server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (err, port) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      server.start();
+      console.log(`gRPC server running on port ${port}`);
+    });
+  }
+  
+  main();
+  
+  const serverPort = 3000;
+  app.listen(serverPort, () => {
+    console.log(`HTTP server running on port ${serverPort}`);
+  });
