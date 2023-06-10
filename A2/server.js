@@ -5,7 +5,10 @@ const protoLoader = require('@grpc/proto-loader');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 
-
+/**
+ * Setting up AWS Sdk,
+ * mapping credentials
+ */
 const s3 = new AWS.S3();
 const credentials = new AWS.SharedIniFileCredentials({ profile: 'default' });
 AWS.config.credentials = credentials;
@@ -23,8 +26,7 @@ const packageDefinition = protoLoader.loadSync('computeandstorage.proto', {
 const computeAndStorageProto = grpc.loadPackageDefinition(packageDefinition).computeandstorage;
 
 /**
- * This is used to store the data sent by the test app
- * 
+ * This is used to store the data sent by the test app * 
  * @param {this contains the data to be written to the S3 bucket file} call 
  * @param {returns the public readable URI} callback 
  */
@@ -74,7 +76,7 @@ function storeData(call, callback) {
 }
 
 /**
- * 
+ * This appends the data to the existing file. This does not send and response
  * @param {contains the data to be appended to the existing file} call 
  * @param {contains the return object} callback 
  */
@@ -116,7 +118,6 @@ function appendData(call, callback) {
 /**
  * Deletes the created object
  * Extracts the object key from the uri
- * 
  * @param {Gets the public URI of the file} call 
  * @param {The response} callback 
  */
@@ -174,6 +175,7 @@ function main() {
     }
     server.start();
     console.log(`gRPC server running on port ${port}`);
+
     /** call test app */
     sendPostRequest();
 
@@ -181,7 +183,3 @@ function main() {
 }
 
 main();
-
-
-
-const serverPort = 3000;
