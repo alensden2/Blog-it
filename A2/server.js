@@ -161,6 +161,3 @@ function main() {
 main();
 
 const serverPort = 3000;
-// app.listen(serverPort, () => {
-//   console.log(`HTTP server running on port ${serverPort}`);
-// });
