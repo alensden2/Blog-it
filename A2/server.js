@@ -40,12 +40,11 @@ function storeData(call, callback) {
     Key: fileName,
   };
 
-  s3.upload(uploadParams, (err, uploadData) => {
+  s3.upload(uploadParams, (err) => {
     if (err) {
       console.error(err);
       callback(err);
     } else {
-      const s3uri = uploadData.Location;
       const getObjectParams = {
         Bucket: 'alen-a2-bucket',
         Key: fileName,
