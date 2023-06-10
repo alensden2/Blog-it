@@ -5,6 +5,7 @@ const protoLoader = require('@grpc/proto-loader');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 
+
 const s3 = new AWS.S3();
 const credentials = new AWS.SharedIniFileCredentials({ profile: 'default' });
 AWS.config.credentials = credentials;
@@ -22,6 +23,7 @@ const packageDefinition = protoLoader.loadSync('computeandstorage.proto', {
 const computeAndStorageProto = grpc.loadPackageDefinition(packageDefinition).computeandstorage;
 
 /**
+ * This is used to store the data sent by the test app
  * 
  * @param {this contains the data to be written to the S3 bucket file} call 
  * @param {returns the public readable URI} callback 
