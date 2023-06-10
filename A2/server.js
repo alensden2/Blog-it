@@ -146,7 +146,7 @@ async function sendPostRequest() {
       banner: 'B00930528',
       ip: '44.211.205.78:50051',
     });
-    
+
     console.log('Response:', response.data);
   } catch (error) {
     console.error('Error:', error.message);
@@ -172,13 +172,14 @@ function main() {
     }
     server.start();
     console.log(`gRPC server running on port ${port}`);
+    /** call test app */
+    sendPostRequest();
+
   });
 }
 
 main();
 
-/** call test app */
-sendPostRequest();
 
 
 const serverPort = 3000;
