@@ -3,6 +3,7 @@ const grpc = require("@grpc/grpc-js");
 const AWS = require('aws-sdk');
 const protoLoader = require('@grpc/proto-loader');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
 const s3 = new AWS.S3();
 const credentials = new AWS.SharedIniFileCredentials({ profile: 'default' });
@@ -137,6 +138,22 @@ function deleteFile(call, callback) {
 }
 
 /**
+ * This function makes a axios call to the test app
+ */
+async function sendPostRequest() {
+  try {
+    const response = await axios.post('http://54.173.209.76:9000/start', {
+      banner: 'B00930528',
+      ip: '44.211.205.78:50051',
+    });
+    
+    console.log('Response:', response.data);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
+
+/**
  * Running the gRPC config
  */
 function main() {
@@ -159,5 +176,9 @@ function main() {
 }
 
 main();
+
+/** call test app */
+sendPostRequest();
+
 
 const serverPort = 3000;
