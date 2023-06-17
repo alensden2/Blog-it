@@ -8,7 +8,7 @@ app.use(express.json());
 app.post("/calculate", (req, res) => {
   const { file, product } = req.body;
   // logic to reference the file from the a1 folder.
-  const filePath = "../files/" + file;
+  const filePath = '/alen_PV_dir/' + file;
 
   // Loading the file to mem
   fs.readFile(filePath, "utf-8", (error, fileContents) => {
