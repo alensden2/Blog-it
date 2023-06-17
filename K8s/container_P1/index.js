@@ -7,6 +7,9 @@ const app = express();
 app.use(express.json());
 
 app.post("/calculate", checkIfFileExists, communicate);
+app.get("/test", (req, res) => {
+  res.send("<h1>It works</h1>");
+});
 app.post("/store-file", (req,res) => {
 const { file, data } = req.body;
 const dir = '../persistant-volume/'

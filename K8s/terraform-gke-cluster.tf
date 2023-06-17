@@ -21,8 +21,8 @@ resource "google_container_cluster" "my_cluster" {
 
   # Node Configuration
   node_config {
-    machine_type = "e2-micro"
-    disk_size_gb = 10
+    # machine_type = "e2-micro"
+    # disk_size_gb = 10
 
     # Image Type
     image_type = "COS_CONTAINERD"

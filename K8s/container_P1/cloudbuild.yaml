@@ -1,24 +1,31 @@
 steps:
-  # First Job: Build and Push Docker Image
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build and Push Docker Image'
+    id: 'Build Docker Image'
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/k8s-b00930528/container-1:latest'
+      - 'us-east1-docker.pkg.dev/k8s-b00930528/cloud-k8/container-1:latest'
       - '.'
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Docker Image to Artifact Registry'
+    id: 'Push Image to Artifact Registry'
     args:
       - 'push'
-      - 'gcr.io/k8s-b00930528/container-1:latest'
-
-  # Second Job: Deploy to GKE Cluster
+      - 'us-east1-docker.pkg.dev/k8s-b00930528/cloud-k8/container-1:latest'
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'GCR credentials'
+    args:
+      - container
+      - clusters
+      - get-credentials
+      - my-cluster
+      - '--zone'
+      - us-central1-a
   - name: 'gcr.io/cloud-builders/kubectl'
     id: 'Deploy to GKE Cluster'
+    env: 
+      - CLOUDSDK_COMPUTE_ZONE=us-central1-a
+      - CLOUDSDK_CONTAINER_CLUSTER=my-cluster
     args:
-      - 'apply'
+      - apply 
       - '-f'
-      - 'container1-deployment.yaml'
-      - '-f'
-      - 'container1-service.yaml'
+      - 'container1-deployment.yaml,container1-service.yaml'
