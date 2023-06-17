@@ -12,7 +12,7 @@ app.get("/test", (req, res) => {
 });
 app.post("/store-file", (req,res) => {
 const { file, data } = req.body;
-const dir = '../persistant-volume/'
+const dir = '/alen_PV_dir/';
 fs.writeFile(dir+file, data, (err) => {
   if(err){
     const response = { 'file' : file, 'error' : 'Error while storing the file to the storage.' }

@@ -17,12 +17,9 @@ spec:
           image: us-east1-docker.pkg.dev/k8s-b00930528/cloud-k8/container-1:latest
           ports:
             - containerPort: 6000
-          # env:
-          #   - name: GOOGLE_APPLICATION_CREDENTIALS
-          #     value: /path/to/your/credentials.json
           volumeMounts:
             - name: alen-pv-dir
-              mountPath: /data
+              mountPath: /alen_PV_dir
       volumes:
         - name: alen-pv-dir
           persistentVolumeClaim:
@@ -38,4 +35,3 @@ spec:
   resources:
     requests:
       storage: 1Gi
-
