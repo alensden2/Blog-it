@@ -13,7 +13,7 @@ app.get("/test", (req, res) => {
 });
 app.get("/test-service", async (req,res) => {
   try {
-    const response = await axios.get("http://container-2:5000/test");
+    const response = await axios.get("http://container-2-service:5000/test");
     res.send(response.data);
   } catch (error) {
     console.error(error);

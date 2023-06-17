@@ -15,6 +15,7 @@ spec:
       containers:
         - name: container-1
           image: us-east1-docker.pkg.dev/k8s-b00930528/cloud-k8/container-1:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 6000
           volumeMounts:
