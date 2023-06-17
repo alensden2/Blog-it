@@ -6,9 +6,6 @@ spec:
   selector:
     app: container-2
   ports:
-    - protocols: TCP
-      port: 5000
+    - port: 5000
       targetPort: 5000
   type: LoadBalancer
-
-
