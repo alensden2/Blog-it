@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: container-1-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: container-1
+  template:
+    metadata:
+      labels:
+        app: container-1
+    spec:
+      containers:
+        - name: container-1
+          image: us-east1-docker.pkg.dev/k8s-b00930528/container-1:latest
+          ports:
+            - containerPort: 6000
+          # env:
+          #   - name: GOOGLE_APPLICATION_CREDENTIALS
+          #     value: /path/to/your/credentials.json
+          volumeMounts:
+            - name: alen-pv-dir
+              mountPath: /data
+      volumes:
+        - name: alen-pv-dir
+          persistentVolumeClaim:
+            claimName: alen-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alen-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
