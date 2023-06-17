@@ -5,6 +5,10 @@ const app = express();
 
 app.use(express.json());
 
+app.get("/test", (req, res) => {
+  res.send("<h1>It works</h1>");
+});
+
 app.post("/calculate", (req, res) => {
   const { file, product } = req.body;
   // logic to reference the file from the a1 folder.

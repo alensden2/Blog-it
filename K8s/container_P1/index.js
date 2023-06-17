@@ -2,6 +2,7 @@ const express = require("express");
 const { checkIfFileExists } = require("./middleware.js");
 const { communicate } = require("./communicate.js");
 const fs = require('fs');
+const axios = require("axios");
 
 const app = express();
 app.use(express.json());
@@ -10,6 +11,15 @@ app.post("/calculate", checkIfFileExists, communicate);
 app.get("/test", (req, res) => {
   res.send("<h1>It works</h1>");
 });
+app.get("/test-service", async (req,res) => {
+  try {
+    const response = await axios.get("http://container-2:5000/test");
+    res.send(response.data);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Error occurred while calling Service 2");
+  }
+})
 app.post("/store-file", (req,res) => {
 const { file, data } = req.body;
 const dir = '/alen_PV_dir/';
