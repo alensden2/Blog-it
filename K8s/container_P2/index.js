@@ -40,6 +40,8 @@ app.post("/calculate", (req, res) => {
         (acc, row) => acc + parseInt(row.amount),
         0
       );
+
+      const sumstr = sum.toString();
       res.status(200).json({ file, sum });
     } catch (error) {
       res.status(400).json({ file, error: "Invalid Input" });
