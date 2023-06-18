@@ -43,15 +43,15 @@ const checkIfFileExists = (req, res, next) => {
       const headerLine = lines[0];
       const expectedHeader = "product,amount";
 
-      if (headerLine !== expectedHeader) {
-        res.status(200).json({
-          file: fileName,
-          error: "Input file not in CSV format.",
-        });
-        return;
-      }
+      // if (headerLine !== expectedHeader) {
+      //   res.status(200).json({
+      //     file: fileName,
+      //     error: "Input file not in CSV format.",
+      //   });
+      //   return;
+      // }
 
-      const regex = /^([^,\n]+),(\d+)$/;
+      const regex = /^([^,\n]+),\s*(\d+)\s*$/;
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
         if (!regex.test(line)) {
