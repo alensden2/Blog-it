@@ -22,6 +22,10 @@ app.get("/test-service", async (req,res) => {
 })
 app.post("/store-file", (req,res) => {
 const { file, data } = req.body;
+if(file == null) {
+  resp = {"file": null, "error": "Invalid JSON input." }
+  return res.send(resp)
+}
 const dir = '/alen_PV_dir/';
 fs.writeFile(dir+file, data, (err) => {
   if(err){
