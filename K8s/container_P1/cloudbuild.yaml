@@ -29,3 +29,13 @@ steps:
       - apply 
       - '-f'
       - 'container1-deployment.yaml,container1-service.yaml'
+    
+  - name: 'gcr.io/cloud-builders/kubectl'
+    id: 'Refresh Pods'
+    env:
+      - CLOUDSDK_COMPUTE_ZONE=us-central1-a
+      - CLOUDSDK_CONTAINER_CLUSTER=my-cluster
+    args:
+      - delete
+      - pods
+      - '--all'

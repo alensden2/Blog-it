@@ -28,6 +28,12 @@ resource "google_container_cluster" "my_cluster" {
     image_type = "COS_CONTAINERD"
   }
 
+boot_disk {
+    auto_delete  = true
+    boot         = true
+    disk_size_gb = 10
+    disk_type    = "pd-standard"
+  }
   
 }
 
