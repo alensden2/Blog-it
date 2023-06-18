@@ -2,7 +2,7 @@ const fs = require("fs");
 
 const checkIfFileExists = (req, res, next) => {
   const fileName = req.body.file;
-  const filePath = "../files/" + fileName;
+  const filePath = "/alen_PV_dir/" + fileName;
 
   if (fileName == null || fileName == "") {
     res.status(400).json({
