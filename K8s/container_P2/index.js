@@ -36,12 +36,12 @@ app.post("/calculate", (req, res) => {
       //filtering the rows -
       const productRows = records.filter((row) => row.product == product);
       // total for the filtered products
-      const sum = productRows.reduce(
+      const sumInt = productRows.reduce(
         (acc, row) => acc + parseInt(row.amount),
         0
       );
 
-      const sumstr = sum.toString();
+      const sum = sumInt.toString();
       res.status(200).json({ file, sum });
     } catch (error) {
       res.status(400).json({ file, error: "Invalid Input" });
