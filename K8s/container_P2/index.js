@@ -23,7 +23,15 @@ app.post("/calculate", (req, res) => {
     try {
       // parsing the file
       fileContents = fileContents.trim();
-
+      let fileContentsWithoutWhiteSpaces = "";
+      for(let i = 0; i < fileContents.length; i++){
+        if (fileContents[i] === " ") {
+          fileContentsWithoutWhiteSpaces += "";
+        } else {
+          fileContentsWithoutWhiteSpaces += fileContents[i];
+        }
+      }
+      fileContents = fileContentsWithoutWhiteSpaces
       const records = csvParse(fileContents, { columns: true });
       //filtering the rows -
       const productRows = records.filter((row) => row.product == product);
