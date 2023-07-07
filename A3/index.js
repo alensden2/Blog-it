@@ -4,7 +4,7 @@ const mysql = require("mysql");
 
 const app = express();
 
-const PORT = 80;
+const PORT = 8080;
 
 const connection = mysql.createConnection({
     host: "database-1.cluster-c5nfrwsooyyf.us-east-1.rds.amazonaws.com",
