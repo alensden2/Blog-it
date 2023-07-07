@@ -18,13 +18,13 @@ connection.connect((err) => {
         console.error("Failed to connect to the database:", err);
         return;
     }
-    connection.query("CREATE DATABASE IF NOT EXISTS your_database_name", (err) => {
+    connection.query("CREATE DATABASE IF NOT EXISTS assignment2", (err) => {
         if (err) {
             console.error("Failed to create database:", err);
             return;
         }
         console.log("Database created");
-        connection.query("USE your_database_name", (err) => {
+        connection.query("USE assignment2", (err) => {
             if (err) {
                 console.error("Failed to select database:", err);
                 return;
@@ -35,14 +35,13 @@ connection.connect((err) => {
     });
 });
 
-
+// Create the products table if it doesn't exist
 function createProductsTable() {
     const query = `
         CREATE TABLE IF NOT EXISTS products (
-            id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(100) NOT NULL,
-            price DECIMAL(10, 2) NOT NULL,
-            availability BOOLEAN NOT NULL DEFAULT true
+            price VARCHAR(100) NOT NULL,
+            availability BOOLEAN NOT NULL
         )
     `;
     connection.query(query, (err) => {
@@ -60,57 +59,53 @@ app.get("/", (req, res) => {
     res.send("<h1>EC2 hello!</h1>");
 });
 
-app.get("/products", (req, res) => {
-    const query = "SELECT * FROM products";
-    connection.query(query, (err, results) => {
+app.post("/store-products", (req, res) => {
+    const { products } = req.body;
+    if (!products || !Array.isArray(products)) {
+        res.status(400).json({ error: "Invalid request payload" });
+        return;
+    }
+    const insertQuery = "INSERT INTO products (name, price, availability) VALUES (?, ?, ?)";
+    const insertPromises = products.map(product => {
+        const { name, price, availability } = product;
+        return new Promise((resolve, reject) => {
+            connection.query(insertQuery, [name, price, availability], (err, result) => {
+                if (err) {
+                    console.error("Failed to store product:", err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    });
+    Promise.all(insertPromises)
+        .then(() => {
+            res.status(200).json({ message: "Products stored successfully" });
+        })
+        .catch(error => {
+            res.status(500).json({ error: "Failed to store products" });
+        });
+});
+
+app.get("/list-products", (req, res) => {
+    const selectQuery = "SELECT name, price, availability FROM products";
+    connection.query(selectQuery, (err, results) => {
         if (err) {
             console.error("Failed to fetch products:", err);
             res.status(500).json({ error: "Failed to fetch products" });
             return;
         }
-        res.status(200).json({ products: results });
+        const productList = results.map(row => ({
+            name: row.name,
+            price: row.price,
+            availability: row.availability
+        }));
+        res.status(200).json({ products: productList });
     });
 });
 
-app.post("/products", (req, res) => {
-    const { name, price, availability } = req.body;
-    const query = "INSERT INTO products (name, price, availability) VALUES (?, ?, ?)";
-    connection.query(query, [name, price, availability], (err, result) => {
-        if (err) {
-            console.error("Failed to store product:", err);
-            res.status(500).json({ error: "Failed to store product" });
-            return;
-        }
-        res.status(200).json({ message: "Product stored successfully" });
-    });
-});
-
-app.put("/products/:id", (req, res) => {
-    const { id } = req.params;
-    const { name, price, availability } = req.body;
-    const query = "UPDATE products SET name = ?, price = ?, availability = ? WHERE id = ?";
-    connection.query(query, [name, price, availability, id], (err, result) => {
-        if (err) {
-            console.error("Failed to update product:", err);
-            res.status(500).json({ error: "Failed to update product" });
-            return;
-        }
-        res.status(200).json({ message: "Product updated successfully" });
-    });
-});
-
-app.delete("/products/:id", (req, res) => {
-    const { id } = req.params;
-    const query = "DELETE FROM products WHERE id = ?";
-    connection.query(query, [id], (err, result) => {
-        if (err) {
-            console.error("Failed to delete product:", err);
-            res.status(500).json({ error: "Failed to delete product" });
-            return;
-        }
-        res.status(200).json({ message: "Product deleted successfully" });
-    });
-});
+createProductsTable();
 
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
