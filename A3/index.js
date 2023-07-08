@@ -7,7 +7,7 @@ const app = express();
 const PORT = 80;
 
 const connection = mysql.createConnection({
-    host: "assignment2db.cluster-cbumd6b2hpli.us-east-1.rds.amazonaws.com",
+    host: "assignment2db-instance-1.cbumd6b2hpli.us-east-1.rds.amazonaws.com",
     port: "3306",
     user: "admin",
     password: "rootroot"
