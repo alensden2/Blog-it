@@ -81,7 +81,7 @@ app.post("/store-products", (req, res) => {
     });
     Promise.all(insertPromises)
         .then(() => {
-            res.status(200).json({ message: "Products stored successfully" });
+            res.status(200).json({ message: "Success." });
         })
         .catch(error => {
             res.status(500).json({ error: "Failed to store products" });
@@ -99,7 +99,7 @@ app.get("/list-products", (req, res) => {
         const productList = results.map(row => ({
             name: row.name,
             price: row.price,
-            availability: row.availability
+            availability: row.availability === 1 ? true : false
         }));
         res.status(200).json({ products: productList });
     });
