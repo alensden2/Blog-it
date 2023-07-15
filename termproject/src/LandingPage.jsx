@@ -1,10 +1,14 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Typography } from '@mui/material';
 import React from 'react';
 import Navbar from './components/navbar';
 import { useNavigate } from 'react-router-dom';
 
 export default function LandingPage() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const handleSignUp = () => {
+    navigate('/register');
+  };
+
   return (
     <>
       <Navbar />
@@ -31,7 +35,7 @@ export default function LandingPage() {
         </Box>
 
         <Box sx={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-          <Button variant="contained" color="primary">
+          <Button onClick={handleSignUp} variant="contained" color="primary">
             Sign Up
           </Button>
           <Button variant="contained" color="secondary">
