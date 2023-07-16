@@ -6,7 +6,7 @@ var dynamoDBTable = 'Authentication_Database';
 
 exports.handler = async (event) => {
   const {email, name, password} = event;
-  
+  console.log('hi this is imp your event is ${event}')
   try {
     const params = {
       TableName: dynamoDBTable,
@@ -14,7 +14,6 @@ exports.handler = async (event) => {
         email : email,
         name : name,
         password: password,
-        status : "online",
       },
     };
     
