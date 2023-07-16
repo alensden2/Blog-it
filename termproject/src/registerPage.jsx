@@ -2,6 +2,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import Navbar from './components/navbar';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -31,17 +32,22 @@ export default function RegisterPage() {
     event.preventDefault();
     try {
       // Call API gateway with the Save user info
-      // Save email to local storage
-
-      /** REMOVE
-       * MOCKED 
-       * FIX API GATEWAY
-       */
-      const userEmail = 'email@example.com';
-
-      localStorage.setItem('email', userEmail);
+      const SAVE_USER_LAMBDA_API_GATEWAY_ENDPOINT = 'https://j2cgew3m8b.execute-api.us-east-1.amazonaws.com/Test/user';
+      // Preparing the request object
+      const request = {
+        email: email, //the email from the form
+        name: name,
+        password: password
+      }
+      // Axios request to the GATEWAY
+      axios.post(SAVE_USER_LAMBDA_API_GATEWAY_ENDPOINT, request).then(res => {
+        console.log("success : ", res.data);
+      }).catch(err => { console.log(err) })
+      localStorage.setItem('email', email);
+      alert("Login Success!")
       navigate("/profilePage")
     } catch (e) {
+      alert("Login Failed")
       console.log(e);
     }
   };
@@ -62,7 +68,7 @@ export default function RegisterPage() {
           <Box sx={{ marginBottom: '1rem' }}>
             <TextField
               label="Email"
-              variant="outlined"          
+              variant="outlined"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -71,7 +77,7 @@ export default function RegisterPage() {
             <TextField
               label="Password"
               variant="outlined"
-              type="password"              
+              type="password"
               value={password}
               onChange={handlePasswordChange}
             />
