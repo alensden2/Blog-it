@@ -9,6 +9,9 @@ export default function LandingPage() {
     navigate('/register');
   };
 
+  const handleLogin = () => {
+    navigate('/login');
+  };
   return (
     <>
       <Navbar />
@@ -38,7 +41,7 @@ export default function LandingPage() {
           <Button onClick={handleSignUp} variant="contained" color="primary">
             Sign Up
           </Button>
-          <Button variant="contained" color="secondary">
+          <Button onClick={handleLogin} variant="contained" color="secondary">
             Sign In
           </Button>
         </Box>
