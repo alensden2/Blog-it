@@ -16,20 +16,24 @@ export default function ProfilePage() {
         fetchBlogs();
     }, []);
 
-    const fetchBlogs = async () => {
-        try {
-            const response = await fetch('API_ENDPOINT', {
-                method: 'POST',
-                body: JSON.stringify({ email }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+    const fetchBlogs = () => {
+        const GET_BLOGS_API = 'https://j2cgew3m8b.execute-api.us-east-1.amazonaws.com/TestBlogPost/user/get-blogs';
+
+        axios.get(GET_BLOGS_API, {
+            params: {
+                email: email,
+            },
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => {
+                console.log(response.data);
+                setBlogs(response.data);
+            })
+            .catch((error) => {
+                console.log(error);
             });
-            const data = await response.json();
-            setBlogs(data);
-        } catch (error) {
-            console.log(error);
-        }
     };
 
     const handleFormSubmit = (event) => {
@@ -102,23 +106,24 @@ export default function ProfilePage() {
                     </form>
                 ) : (
                     <div>
-                        {blogs.length === 0 ? (
-                            <Typography variant="body1">No blogs available</Typography>
-                        ) : (
-                            blogs.map((blog) => (
-                                <div key={blog.id}>
-                                    <h3>{blog.title}</h3>
-                                    <p>{blog.content}</p>
-                                </div>
-                            ))
-                        )}
-                        <Box sx={{ marginTop: '2rem' }}>
-                            <Button variant="contained" color="primary" onClick={() => setShowForm(true)}>
-                                Add Blog
-                            </Button>
-                        </Box>
-                    </div>
-                )}
+                      {blogs.length === 0 ? (
+                        <Typography variant="body1">No blogs available</Typography>
+                      ) : (
+                        <div>
+                          {blogs.map((blog, index) => (
+                            <div key={index} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
+                              <h3 style={{ marginBottom: '0.5rem' }}>Author: {blog.email}</h3>
+                              <p style={{ whiteSpace: 'pre-line' }}>{blog.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <Box sx={{ marginTop: '2rem' }}>
+                        <Button variant="contained" color="primary" onClick={() => setShowForm(true)}>
+                          Add Blog
+                        </Button>
+                      </Box>
+                    </div>)}
             </div>
         </div>
     );

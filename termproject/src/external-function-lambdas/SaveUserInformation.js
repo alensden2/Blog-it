@@ -5,6 +5,7 @@ var documentClient = new AWS.DynamoDB.DocumentClient();
 var dynamoDBTable = 'Authentication_Database';
 
 exports.handler = async (event) => {
+  console.log('Entered save user Lambda')
   const {email, name, password} = event;
   console.log('hi this is imp your event is ${event}')
   try {
@@ -22,11 +23,15 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'User information stored successfully' }),
+      headers:{ 'Access-Control-Allow-Origin' : '*' }
+
     };
   } catch (e) {
     return {
       statusCode: 500,
       body: JSON.stringify({ e: 'Failed to store user information' }),
+      headers:{ 'Access-Control-Allow-Origin' : '*' }
+
     };
   }
 }
