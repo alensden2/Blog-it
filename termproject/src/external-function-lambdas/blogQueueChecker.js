@@ -21,9 +21,16 @@ exports.handler = async (event) => {
       // Parse the message body as JSON
       const messageObject = JSON.parse(body);
 
-      // Publish the received blog object to the specified SNS topic
+      // Customize the email content
+      const userEmail = messageObject.email;
+      const blogContent = messageObject.content;
+      const emailSubject = "New Blog Posted";
+      const emailMessage = `Hello Admin,\n\nA new Blog has been posted by the user ${userEmail}:\n${blogContent}\n\nPlease review the content.\n\nRegards,\nBlogit`;
+
+      // Publish the custom email to the specified SNS topic
       const snsParams = {
-        Message: JSON.stringify(messageObject), // Convert the object to a JSON string
+        Subject: emailSubject,
+        Message: emailMessage,
         TopicArn: 'arn:aws:sns:us-east-1:524240663239:BlogitAdminEmail', // Replace with your SNS topic ARN
       };
 

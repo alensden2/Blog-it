@@ -1,0 +1,255 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Blog it, Production environment
+
+Resources:
+# DynamoDB 1 Authentication (email as partition key)
+  DynamoDBAuthenticationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Authentication_Table
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+# DynamoDB 2 Blogs (EMAIL -> partition key; BLOG_ID -> sort key)
+  DynamoDBBlogsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Blogs
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+        - AttributeName: blog_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+        - AttributeName: blog_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+# Lambda 1 Blog Function - Saves registration info to the database Authentication Table
+  SaveUserInfoProd:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SaveUserInfoProd
+      Runtime: nodejs14.x
+      Role: arn:aws:iam::524240663239:role/LabRole
+      Handler: index.handler
+      Code: 
+        S3Bucket: blog-it-production
+        S3Key: 1#LambdaSaveUser.zip
+# Lambda 2 Blog Function - Logins the user checks from database Authentication Table
+  LoginUserInfoProd:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: LoginUserInfoProd
+      Runtime: nodejs14.x
+      Role: arn:aws:iam::524240663239:role/LabRole
+      Handler: index.handler
+      Code: 
+        S3Bucket: blog-it-production
+        S3Key: 2-6b859cf5-d7b0-479d-b10b-f5ec664d68c8.zip
+# Lambda 3 Blog Function - fetch all blogs
+  AllBlogsProd:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: AllBlogsProd
+      Runtime: nodejs14.x
+      Role: arn:aws:iam::524240663239:role/LabRole
+      Handler: index.handler
+      Code:
+        S3Bucket: blog-it-production
+        S3Key: 3-dc9af79b-17e4-4487-919c-4bd4081c9de7.zip
+# SQS to process the blogposts in a structured way
+  BlogItQueueProd:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: BlogItQueueProd
+      DelaySeconds: 0
+      MaximumMessageSize: 262144
+      MessageRetentionPeriod: 345600
+      ReceiveMessageWaitTimeSeconds: 0
+      VisibilityTimeout: 30
+# Lambda 4 Blog Function and SQS - Adds a new blog and sends the blog to SQS
+  AddBlogProd:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: AddBlogProd
+      Runtime: nodejs14.x
+      Role: arn:aws:iam::524240663239:role/LabRole
+      Handler: index.handler
+      Code:
+        S3Bucket: blog-it-production
+        S3Key: 4-f0aade62-1897-4901-93d1-a3a29989a367.zip
+# SNS for the email to the admin
+  BlogItSNSProd:
+    Type: AWS::SNS::Topic
+    Properties: 
+      TopicName: BlogItTopic
+# Subscriber set for this topic 
+  BlogItSNSSubscriberProd:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref BlogItSNSProd
+      Endpoint: alensanjohn1999@gmail.com
+# Lambda 5 SQS CHECKER - This lambda is triggered after the sqs receives an event this 
+# # lambda sends the sns the content for the notification (the only lambda not exposed with api gateway)
+  QueueCheckProd:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: QueueCheckProd
+      Runtime: nodejs14.x
+      Role: arn:aws:iam::524240663239:role/LabRole
+      Handler: index.handler
+      Code:
+        S3Bucket: blog-it-production
+        S3Key: 5-29b2f559-2291-413c-ad5b-e9c30f380f19.zip
+      Environment:
+        Variables:
+          SNSTopicARN: !Ref BlogItSNSProd
+## Setting the trigger permission
+  QueueCheckerLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt QueueCheckProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: sqs.amazonaws.com
+      SourceArn: !GetAtt BlogItQueueProd.Arn
+## Setting the trigger event source mapping 
+  LabelSourceMap:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 10
+      EventSourceArn: !GetAtt BlogItQueueProd.Arn
+      FunctionName: !GetAtt QueueCheckProd.Arn
+## API GATEWAY
+  BlogItProdApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: Prod-blog-it-API
+## Resource 1 
+  ResourceLabel1:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+      ParentId: !GetAtt BlogItProdApi.RootResourceId
+      PathPart: register
+## Option for Resource 1
+  OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref BlogItProdApi
+      ResourceId: !Ref ResourceLabel1
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE'"
+              "method.response.header.Access-Control-Allow-Origin": "'*'"
+            ResponseTemplates:
+              "application/json": ""
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          "application/json": '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            "method.response.header.Access-Control-Allow-Headers": true
+            "method.response.header.Access-Control-Allow-Methods": true
+            "method.response.header.Access-Control-Allow-Origin": true
+          ResponseModels:
+            "application/json": "Empty"
+# POST METHOD FOR R1
+  R1MethodLabel:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+      ResourceId: !Ref ResourceLabel1
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SaveUserInfoProd.Arn}/invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: $input.json('$')
+      RequestParameters:
+        method.request.querystring.name: false
+      MethodResponses:
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+          StatusCode: "200"
+  ###API Gateway GatewayResponse for DEFAULT 4XX
+  ApiGatewayDefault4XXResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref BlogItProdApi
+      StatusCode: 400
+      ResponseTemplates:
+        application/json: |
+          {
+            "message": "Bad Request"
+          }
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'" 
+
+  ###API Gateway GatewayResponse for DEFAULT 5XX
+  ApiGatewayDefault5XXResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_5XX
+      RestApiId: !Ref BlogItProdApi
+      StatusCode: 500
+      ResponseTemplates:
+        application/json: |
+          {
+            "message": "Internal Server Error"
+          }
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'" 
+  # Add a permission to allow API Gateway to invoke the Lambda function
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt SaveUserInfoProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
+  # Deploy the api
+  DeployApiLabel:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - R1MethodLabel
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+  # Test Stage
+  TestStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: !Ref DeployApiLabel
+      RestApiId: !Ref BlogItProdApi
+      StageName: test
