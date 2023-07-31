@@ -28,7 +28,7 @@ export default function LoginPage() {
     event.preventDefault();
     try {
       // Call API gateway to authenticate user
-      const LOGIN_LAMBDA_API_GATEWAY_ENDPOINT = 'https://j2cgew3m8b.execute-api.us-east-1.amazonaws.com/TestBlogPost/user/login';
+      const LOGIN_LAMBDA_API_GATEWAY_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT}/login`;
       // Preparing the request object
       const request = {
         email: email,

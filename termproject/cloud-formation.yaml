@@ -479,3 +479,58 @@ Resources:
       DeploymentId: !Ref DeployApiLabel
       RestApiId: !Ref BlogItProdApi
       StageName: test
+  # Frontend
+  ReactFrontEndLabel:
+    Type: "AWS::ElasticBeanstalk::Application"
+    Properties:
+      Description: "Frontend app on elastic beanstalk"
+      ApplicationName: "BlogItProduction"
+  # Version
+  BlogIttestVersion:
+    Type: "AWS::ElasticBeanstalk::ApplicationVersion"
+    DependsOn:
+      - ReactFrontEndLabel
+    Properties:
+      ApplicationName: !Ref ReactFrontEndLabel
+      Description: "Application Version of the Frontend App"
+      SourceBundle:
+        S3Bucket: "blog-it-production"
+        S3Key: "Front-end.zip"
+  ReactFrontEndLabelConfig:
+    Type: "AWS::ElasticBeanstalk::ConfigurationTemplate"
+    Properties:
+     ApplicationName: !Ref ReactFrontEndLabel
+     Description: "Configuration Template for the Frontend App"
+     SolutionStackName: "64bit Amazon Linux 2 v5.8.4 running Node.js 14"
+     OptionSettings:
+      - Namespace: "aws:autoscaling:launchconfiguration"
+        OptionName: "InstanceType"
+        Value: "t3.micro,t3.small"
+      - Namespace: "aws:autoscaling:launchconfiguration"
+        OptionName: "EC2KeyName"
+        Value: "vockey"
+      - Namespace: "aws:autoscaling:launchconfiguration"
+        OptionName: "IamInstanceProfile"
+        Value: "LabInstanceProfile"
+      - Namespace: "aws:elasticbeanstalk:environment"
+        OptionName: "ServiceRole"
+        Value: "arn:aws:iam::524240663239:role/LabRole"
+      - Namespace: "aws:elasticbeanstalk:environment"
+        OptionName: "EnvironmentType"
+        Value: "SingleInstance"
+      - Namespace: "aws:elasticbeanstalk:application:environment"
+        OptionName: "REACT_APP_API_ENDPOINT"
+        Value: !Sub "https://${APIGATEWAYLabel}.execute-api.${AWS::Region}.amazonaws.com"
+  # Elastic Beanstalk Environment
+  ReactFrontEndEnvironment:
+    Type: "AWS::ElasticBeanstalk::Environment"
+    Properties:
+      ApplicationName: !Ref ReactFrontEndLabel
+      EnvironmentName: "ReactFrontEndEnvironment"
+      Description: "Elastic Beanstalk Environment for the Frontend App"
+      VersionLabel: !Ref BlogIttestVersion
+      TemplateName: !Ref ReactFrontEndLabelConfig
+      OptionSettings:
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: "EnvironmentType"
+          Value: "SingleInstance"  
