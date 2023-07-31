@@ -16,7 +16,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
-
 # DynamoDB 2 Blogs (EMAIL -> partition key; BLOG_ID -> sort key)
   DynamoDBBlogsTable:
     Type: AWS::DynamoDB::Table
@@ -495,17 +494,17 @@ Resources:
       Description: "Application Version of the Frontend App"
       SourceBundle:
         S3Bucket: "blog-it-production"
-        S3Key: "Front-end.zip"
+        S3Key: "final-testing-1.zip"
   ReactFrontEndLabelConfig:
     Type: "AWS::ElasticBeanstalk::ConfigurationTemplate"
     Properties:
      ApplicationName: !Ref ReactFrontEndLabel
      Description: "Configuration Template for the Frontend App"
-     SolutionStackName: "64bit Amazon Linux 2 v5.8.4 running Node.js 14"
+     SolutionStackName: "64bit Amazon Linux 2 v5.8.4 running Node.js 18"
      OptionSettings:
       - Namespace: "aws:autoscaling:launchconfiguration"
         OptionName: "InstanceType"
-        Value: "t3.micro,t3.small"
+        Value: "t3.large"
       - Namespace: "aws:autoscaling:launchconfiguration"
         OptionName: "EC2KeyName"
         Value: "vockey"
@@ -520,7 +519,7 @@ Resources:
         Value: "SingleInstance"
       - Namespace: "aws:elasticbeanstalk:application:environment"
         OptionName: "REACT_APP_API_ENDPOINT"
-        Value: !Sub "https://${APIGATEWAYLabel}.execute-api.${AWS::Region}.amazonaws.com"
+        Value: !Sub "https://${BlogItProdApi}.execute-api.${AWS::Region}.amazonaws.com"
   # Elastic Beanstalk Environment
   ReactFrontEndEnvironment:
     Type: "AWS::ElasticBeanstalk::Environment"
@@ -533,4 +532,4 @@ Resources:
       OptionSettings:
         - Namespace: "aws:elasticbeanstalk:environment"
           OptionName: "EnvironmentType"
-          Value: "SingleInstance"  
+          Value: "SingleInstance"

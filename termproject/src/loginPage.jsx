@@ -29,6 +29,7 @@ export default function LoginPage() {
     try {
       // Call API gateway to authenticate user
       const LOGIN_LAMBDA_API_GATEWAY_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT}/login`;
+      console.log(process.env.REACT_APP_API_ENDPOINT)
       // Preparing the request object
       const request = {
         email: email,
