@@ -135,6 +135,38 @@ Resources:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: Prod-blog-it-API
+  # Add a permission to allow API Gateway to invoke the Lambda function
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt SaveUserInfoProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
+    # Add a permission to allow API Gateway to invoke the Lambda function
+  ApiGatewayInvokePermission2:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LoginUserInfoProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
+  # Add a permission to allow API Gateway to invoke the Lambda function 4 (AddBlogProd)
+  ApiGatewayInvokePermission3:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt AddBlogProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
+  # Add a permission to allow API Gateway to invoke the Lambda function 3 (AllBlogsProd)
+  ApiGatewayInvokePermission4:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt AllBlogsProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
 ## Resource 1 
   ResourceLabel1:
     Type: AWS::ApiGateway::Resource
@@ -429,38 +461,6 @@ Resources:
           }
       ResponseParameters:
         gatewayresponse.header.Access-Control-Allow-Origin: "'*'" 
-  # Add a permission to allow API Gateway to invoke the Lambda function
-  ApiGatewayInvokePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt SaveUserInfoProd.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
-    # Add a permission to allow API Gateway to invoke the Lambda function
-  ApiGatewayInvokePermission2:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt LoginUserInfoProd.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
-  # Add a permission to allow API Gateway to invoke the Lambda function 4 (AddBlogProd)
-  ApiGatewayInvokePermission3:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt AddBlogProd.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
-  # Add a permission to allow API Gateway to invoke the Lambda function 3 (AllBlogsProd)
-  ApiGatewayInvokePermission4:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt AllBlogsProd.Arn
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
   # Deploy the api
   DeployApiLabel:
     Type: AWS::ApiGateway::Deployment
