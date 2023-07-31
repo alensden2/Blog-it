@@ -88,7 +88,7 @@ Resources:
       Handler: index.handler
       Code:
         S3Bucket: blog-it-production
-        S3Key: 4-f0aade62-1897-4901-93d1-a3a29989a367.zip
+        S3Key: AddBlogProd-a04adee7-fb7f-4a23-95b5-cf224c114e8b.zip
 # SNS for the email to the admin
   BlogItSNSProd:
     Type: AWS::SNS::Topic
@@ -144,7 +144,7 @@ Resources:
       ParentId: !GetAtt BlogItProdApi.RootResourceId
       PathPart: register
 ## Option for Resource 1
-  OptionsMethod:
+  OptionsMethod1:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
@@ -202,6 +202,138 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
           StatusCode: "200"
+  ## Resource 2 (Login)
+  ResourceLabel2:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+      ParentId: !GetAtt BlogItProdApi.RootResourceId
+      PathPart: login
+  ## Option for Resource 2 (Login)
+  OptionsMethod2:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref BlogItProdApi
+      ResourceId: !Ref ResourceLabel2
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE'"
+              "method.response.header.Access-Control-Allow-Origin": "'*'"
+            ResponseTemplates:
+              "application/json": ""
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          "application/json": '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            "method.response.header.Access-Control-Allow-Headers": true
+            "method.response.header.Access-Control-Allow-Methods": true
+            "method.response.header.Access-Control-Allow-Origin": true
+          ResponseModels:
+            "application/json": "Empty"
+  ## POST method for Resource 2 (Login)
+  R2MethodLabel:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+      ResourceId: !Ref ResourceLabel2
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginUserInfoProd.Arn}/invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: $input.json('$')
+      RequestParameters:
+        method.request.querystring.name: false
+      MethodResponses:
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+          StatusCode: "200"
+  ## Resource 3 (AddBlogProd)
+  ResourceLabel3:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+      ParentId: !GetAtt BlogItProdApi.RootResourceId
+      PathPart: add-blog
+  ## Option for Resource 3 (AddBlogProd)
+  OptionsMethod3:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref BlogItProdApi
+      ResourceId: !Ref ResourceLabel3
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE'"
+              "method.response.header.Access-Control-Allow-Origin": "'*'"
+            ResponseTemplates:
+              "application/json": ""
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          "application/json": '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            "method.response.header.Access-Control-Allow-Headers": true
+            "method.response.header.Access-Control-Allow-Methods": true
+            "method.response.header.Access-Control-Allow-Origin": true
+          ResponseModels:
+            "application/json": "Empty"
+## POST method for Resource 3 (AddBlogProd)
+  R3MethodLabel:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref BlogItProdApi
+      ResourceId: !Ref ResourceLabel3
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddBlogProd.Arn}/invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: $input.json('$')
+      RequestParameters:
+        method.request.querystring.name: false
+      MethodResponses:
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+          StatusCode: "200"
   ###API Gateway GatewayResponse for DEFAULT 4XX
   ApiGatewayDefault4XXResponse:
     Type: AWS::ApiGateway::GatewayResponse
@@ -239,11 +371,29 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
+    # Add a permission to allow API Gateway to invoke the Lambda function
+  ApiGatewayInvokePermission2:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt LoginUserInfoProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
+  # Add a permission to allow API Gateway to invoke the Lambda function 4 (AddBlogProd)
+  ApiGatewayInvokePermission4:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt AddBlogProd.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BlogItProdApi}/*/*"
   # Deploy the api
   DeployApiLabel:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - R1MethodLabel
+      - R2MethodLabel
+      - R3MethodLabel
     Properties:
       RestApiId: !Ref BlogItProdApi
   # Test Stage
