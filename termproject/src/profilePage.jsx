@@ -17,7 +17,7 @@ export default function ProfilePage() {
     }, []);
 
     const fetchBlogs = () => {
-        const GET_BLOGS_API = `${process.env.REACT_APP_API_ENDPOINT}/allblogs`;
+        const GET_BLOGS_API = `${process.env.REACT_APP_API_ENDPOINT}/test/allblogs`;
 
         axios.get(GET_BLOGS_API, {
             params: {
@@ -43,7 +43,7 @@ export default function ProfilePage() {
             // sort_key
             const blog_id = uuidv4()
             //response object
-            const ADD_USER_BLOG_POST_API_GATEWAY = `${process.env.REACT_APP_API_ENDPOINT}/add-blog`
+            const ADD_USER_BLOG_POST_API_GATEWAY = `${process.env.REACT_APP_API_ENDPOINT}/test/add-blog`
             const request = {
                 email: email,
                 blog_id: blog_id,

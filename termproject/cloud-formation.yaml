@@ -494,7 +494,7 @@ Resources:
       Description: "Application Version of the Frontend App"
       SourceBundle:
         S3Bucket: "blog-it-production"
-        S3Key: "final-testing-1.zip"
+        S3Key: "Front-end-final.zip"
   ReactFrontEndLabelConfig:
     Type: "AWS::ElasticBeanstalk::ConfigurationTemplate"
     Properties:

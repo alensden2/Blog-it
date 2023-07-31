@@ -32,7 +32,7 @@ export default function RegisterPage() {
     event.preventDefault();
     try {
       // Call API gateway with the Save user info
-      const SAVE_USER_LAMBDA_API_GATEWAY_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT}/register`;
+      const SAVE_USER_LAMBDA_API_GATEWAY_ENDPOINT = `${process.env.REACT_APP_API_ENDPOINT}/test/register`;
       // Preparing the request object
       const request = {
         email: email, //the email from the form
